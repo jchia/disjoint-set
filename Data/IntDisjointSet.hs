@@ -31,7 +31,7 @@ this to be persistent, lookup is stateful and so returns the result
 of the lookup and a new disjoint set.
 
 Additionally, to make sure that path lengths grow logarithmically, we
-maintain the rank of a set. This is a logarithmic upper bound on the 
+maintain the rank of a set. This is a logarithmic upper bound on the
 number of elements in each set. When we compute the union of two sets,
 we make the set with the smaller rank a child of the set with the larger
 rank. When two sets have equal rank, the first set is a child of the second
@@ -164,10 +164,13 @@ in arbitrary order.
 -}
 toList :: IntDisjointSet -> ([(Int, Int)], IntDisjointSet)
 toList set = flip runState set $ do
-               xs <- state elems
-               forM xs $ \x -> do
-                 Just rep <- state $ lookup x
-                 return (x, rep)
+              xs <- state elems
+              forM xs $ \x -> do
+                repMay <- state $ lookup x
+                case repMay of
+                  Nothing -> error "impossible: IntDisjointSet lookup failed in toList"
+                  Just rep -> return (x, rep)
+
 
 {-|
 Given an association list representing equivalences between elements,
